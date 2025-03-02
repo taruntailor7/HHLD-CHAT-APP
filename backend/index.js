@@ -10,17 +10,21 @@ const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
     allowedHeaders: ["*"],
+    // origin: ["http://localhost:3000", "http://localhost:3001"],
     origin: "*",
   },
 });
 
 io.on("connection", (socket) => {
   console.log("Client connected");
-  
   socket.on("chat msg", (msg) => {
     console.log("Received msg " + msg);
+    // io.emit("chat msg", msg);
+    socket.broadcast.emit("chat msg", msg);
   });
 });
+
+app.use(express.json());
 
 // Define a route
 app.get("/", (req, res) => {
