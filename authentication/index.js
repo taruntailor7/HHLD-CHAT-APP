@@ -3,20 +3,23 @@ import dotenv from "dotenv";
 import authRouter from './routes/auth.route.js'
 import connectToMongoDB from './db/connection.js'
 import cors from 'cors'
+import usersRouter from './routes/users.route.js'
 
 dotenv.config();
 const port = process.env.PORT || 8000;
 
 const app = express();
 app.use(cors({
-  origin: "*", // Allows all origins (not safe for production)
+  origin: "http://localhost:3000",
   allowedHeaders: ["Content-Type", "Authorization"], // Define necessary headers
-  methods: ["GET", "POST", "PUT", "DELETE"], // Allowed HTTP methods
+  methods: ["GET", "POST", "PUT", "DELETE", "PATCH"], // Allowed HTTP methods
+  credentials: true,
 }));
 
 app.use(express.json());
 
 app.use('/auth', authRouter);
+app.use('/users', usersRouter);
 
 // Define a route
 app.get("/", (req, res) => {
