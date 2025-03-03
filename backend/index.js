@@ -15,12 +15,29 @@ const io = new Server(server, {
   },
 });
 
+const userSocketMap = {};
+
 io.on("connection", (socket) => {
   console.log("Client connected");
+
+  const username = socket.handshake.query.username;
+  console.log("Username:", username);
+
+  userSocketMap[username] = socket;
+
+  // socket.on("chat msg", (msg) => {
+  //   console.log("Received msg " + msg);
+  //   socket.broadcast.emit("chat msg", msg);
+  // });
   socket.on("chat msg", (msg) => {
-    console.log("Received msg " + msg);
-    // io.emit("chat msg", msg);
-    socket.broadcast.emit("chat msg", msg);
+    // console.log(msg.sender);
+    // console.log(msg.receiver);
+    // console.log(msg.text);
+    // socket.broadcast.emit("chat msg", msg.text);
+    const receiverSocket = userSocketMap[msg.receiver];
+    if (receiverSocket) {
+      receiverSocket.emit("chat msg", msg);
+    }
   });
 });
 
