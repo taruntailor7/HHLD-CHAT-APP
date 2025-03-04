@@ -2,7 +2,7 @@ import express from "express";
 import dotenv from "dotenv";
 import authRouter from './routes/auth.route.js'
 import connectToMongoDB from './db/connection.js'
-import cors from 'cors'
+import cors from 'cors';
 import usersRouter from './routes/users.route.js'
 import cookieParser from "cookie-parser";
 
@@ -14,7 +14,7 @@ const app = express();
 app.use(express.json());
 app.use(cookieParser());
 app.use(cors({
-  origin: ["http://localhost:3000", "http://localhost:3001"],
+  origin: ["http://localhost:3000", "http://localhost:3001", "http://localhost:3002"],
   allowedHeaders: ["Content-Type", "Authorization"], // Define necessary headers
   methods: ["GET", "POST", "PUT", "DELETE", "PATCH"], // Allowed HTTP methods
   credentials: true,

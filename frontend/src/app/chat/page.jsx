@@ -38,7 +38,7 @@ const Chat = () => {
       console.log("received msg on client " + msgrecv);
       setMsgs((prevMsgs) => [
         ...prevMsgs,
-        { text: msgrecv, sentByCurrUser: false },
+        { ...msgrecv, sentByCurrUser: false },
       ]);
     });
 
@@ -58,7 +58,7 @@ const Chat = () => {
 
     if (socket) {
       socket.emit("chat msg", msgToBeSent);
-      setMsgs((prevMsgs) => [...prevMsgs, { text: msg, sentByCurrUser: true }]);
+      setMsgs((prevMsgs) => [...prevMsgs, { ...msgToBeSent, sentByCurrUser: true }]);
       setMsg("");
     }
   };
@@ -85,7 +85,7 @@ const Chat = () => {
             <div
               key={index}
               className={`m-3 p-1 ${
-                msg.sender === authName ? "text-left" : "text-right"
+                msg.sender === authName ? "text-right" : "text-left"
               }`}
             >
               <span

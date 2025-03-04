@@ -2,16 +2,38 @@ import express from "express";
 import dotenv from "dotenv";
 import { Server } from "socket.io";
 import http from "http";
+import connectToMongoDB from "./db/connection.js";
+import { addMsgToConversation } from "./controllers/msgs.controller.js";
+import msgsRouter from "./routes/msgs.route.js";
+import cors from 'cors';
 dotenv.config();
+
 const port = process.env.PORT || 5000;
 
 const app = express();
+app.use(
+  cors({
+    origin: [
+      "http://localhost:3000",
+      "http://localhost:3001",
+      "http://localhost:3002",
+    ],
+    allowedHeaders: ["Content-Type", "Authorization"], // Define necessary headers
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH"], // Allowed HTTP methods
+    credentials: true,
+  })
+);
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    allowedHeaders: ["*"],
-    // origin: ["http://localhost:3000", "http://localhost:3001"],
-    origin: "*",
+    origin: [
+      "http://localhost:3000",
+      "http://localhost:3001",
+      "http://localhost:3002",
+    ],
+    allowedHeaders: ["Content-Type", "Authorization"], // Define necessary headers
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH"], // Allowed HTTP methods
+    credentials: true,
   },
 });
 
@@ -31,17 +53,23 @@ io.on("connection", (socket) => {
   // });
   socket.on("chat msg", (msg) => {
     // console.log(msg.sender);
-    // console.log(msg.receiver);
+    console.log(msg.receiver);
     // console.log(msg.text);
     // socket.broadcast.emit("chat msg", msg.text);
     const receiverSocket = userSocketMap[msg.receiver];
     if (receiverSocket) {
       receiverSocket.emit("chat msg", msg);
     }
+    addMsgToConversation([msg.sender, msg.receiver], {
+      text: msg.text,
+      sender: msg.sender,
+      receiver: msg.receiver,
+    });
   });
 });
 
 app.use(express.json());
+app.use("/msgs", msgsRouter);
 
 // Define a route
 app.get("/", (req, res) => {
@@ -50,5 +78,6 @@ app.get("/", (req, res) => {
 
 // Start the server
 server.listen(port, () => {
+  connectToMongoDB();
   console.log(`Server is listening at http://localhost:${port}`);
 });
