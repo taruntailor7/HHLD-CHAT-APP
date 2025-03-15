@@ -6,14 +6,16 @@ import axios from "axios";
 import { useUsersStore } from "../zustand/useUsersStore";
 import ChatUsers from "../_components/chatUsers";
 import { useChatReceiverStore } from "../zustand/useChatReceiverStore";
+import { chatMsgs, useChatMsgsStore } from "../zustand/useChatMsgsStore";
 
 const Chat = () => {
   const [msg, setMsg] = useState("");
   const [socket, setSocket] = useState(null);
-  const [msgs, setMsgs] = useState([]);
+  // const [msgs, setMsgs] = useState([]);
   const { authName } = useAuthStore();
   const { updateUsers } = useUsersStore();
   const chatReceiver = useChatReceiverStore((state) => (state.chatReceiver));
+  const { chatMsgs, updateChatMsgs } = useChatMsgsStore();
 
 
   const getUserData = async () => {
@@ -36,10 +38,11 @@ const Chat = () => {
     // Listen for incoming msgs
     newSocket.on("chat msg", (msgrecv) => {
       console.log("received msg on client " + msgrecv);
-      setMsgs((prevMsgs) => [
-        ...prevMsgs,
-        { ...msgrecv, sentByCurrUser: false },
-      ]);
+      updateChatMsgs([...chatMsgs, msgrecv]);
+      // setMsgs((prevMsgs) => [
+      //   ...prevMsgs,
+      //   { ...msgrecv, sentByCurrUser: false },
+      // ]);
     });
 
     getUserData();
@@ -58,7 +61,8 @@ const Chat = () => {
 
     if (socket) {
       socket.emit("chat msg", msgToBeSent);
-      setMsgs((prevMsgs) => [...prevMsgs, { ...msgToBeSent, sentByCurrUser: true }]);
+      // setMsgs((prevMsgs) => [...prevMsgs, { ...msgToBeSent, sentByCurrUser: true }]);
+      updateChatMsgs([...chatMsgs, msgToBeSent]);
       setMsg("");
     }
   };
@@ -81,7 +85,7 @@ const Chat = () => {
 
         {/* Messages Container */}
         <div className="flex-1 overflow-y-auto p-4">
-          {msgs?.map((msg, index) => (
+          {chatMsgs?.map((msg, index) => (
             <div
               key={index}
               className={`m-3 p-1 ${

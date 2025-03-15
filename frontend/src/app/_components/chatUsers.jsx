@@ -17,22 +17,17 @@ const ChatUsers = () => {
 
   useEffect(() => {
     const getMsgs = async () => {
-      const res = await axios.get(
-        "http://localhost:5000/msgs",
-        {
+      try {
+        const res = await axios.get("http://localhost:5000/msgs", {
           params: {
             sender: authName,
             receiver: chatReceiver,
           },
-        },
-        {
           withCredentials: true,
-        }
-      );
-      if (res.data.length !== 0) {
-        updateChatMsgs(res.data);
-      } else {
-        updateChatMsgs([]);
+        });
+        updateChatMsgs(res.data.length ? res.data : []);
+      } catch (error) {
+        console.error("Error fetching messages:", error);
       }
     };
     if (chatReceiver) {
