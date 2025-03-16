@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+ backend:
+   build:
+     context: ./backend # Path to the backend Dockerfile
+   ports:
+     - "5000:5000"
+
+
+ backend2:
+   build:
+     context: ./backend # Path to the backend Dockerfile
+   ports:
+     - "5001:5000"
+
+
+ auth-backend:
+   build:
+     context: ./authentication # Path to the backend Dockerfile
+   ports:
+     - "8000:8000" 
+
+
+ frontend:
+   build:
+     context: ./frontend # Path to the frontend Dockerfile
+   ports:
+     - "3000:3000"
+   depends_on:
+     - backend # Wait for backend service to be ready before starting frontend
+
+
+ frontend2:
+   build:
+     context: ./frontend2 # Path to the frontend Dockerfile
+   ports:
+     - "3001:3000"
+   depends_on:
+     - backend2 # Wait for backend service to be ready before starting frontend
