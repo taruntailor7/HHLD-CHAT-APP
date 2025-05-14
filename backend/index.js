@@ -5,7 +5,7 @@ import http from "http";
 import connectToMongoDB from "./db/connection.js";
 import { addMsgToConversation } from "./controllers/msgs.controller.js";
 import msgsRouter from "./routes/msgs.route.js";
-import cors from 'cors';
+import cors from "cors";
 dotenv.config();
 
 const port = process.env.PORT || 5000;
@@ -47,6 +47,15 @@ io.on("connection", (socket) => {
 
   userSocketMap[username] = socket;
 
+  // The callback function is executed whenever a message is received on
+  // the specified Redis channel. When a message is received,
+  // it's passed to this callback function as the msg parameter.
+  const channelName = `chat_${username}`;
+  subscribe(channelName, (msg) => {
+    console.log("Received message:", msg);
+    socket.emit("chat msg", JSON.parse(msg));
+  });
+
   // socket.on("chat msg", (msg) => {
   //   console.log("Received msg " + msg);
   //   socket.broadcast.emit("chat msg", msg);
@@ -59,7 +68,11 @@ io.on("connection", (socket) => {
     const receiverSocket = userSocketMap[msg.receiver];
     if (receiverSocket) {
       receiverSocket.emit("chat msg", msg);
+    } else {
+      const channelName = `chat_${msg.receiver}`;
+      publish(channelName, JSON.stringify(msg));
     }
+
     addMsgToConversation([msg.sender, msg.receiver], {
       text: msg.text,
       sender: msg.sender,
